@@ -1,0 +1,165 @@
+/**
+ * css for videojs-freewheel-ads
+ * With the default plugins for postcss you can
+ * - @import files, they will be inlined during build
+ * - not worry about browser prefixes, they will be handled
+ * - nest selectors. This follows the css specification that is
+ *   currently out on some browsers. See https://tabatkins.github.io/specs/css-nesting/
+ * - custom properties (aka variables) via the var(--var-name) syntax. See
+ *   https://www.w3.org/TR/css-variables-1/
+ */
+
+/* Note: all vars must be defined here, there are no "local" vars */
+:root {
+  --main-color: red;
+  --base-font-size: 9;
+  --font-size: 7;
+}
+
+/**
+ * Copyright 2014 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.fw-ad-container {
+  top: 0em;
+  position: absolute;
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Move overlay if user fast-clicks play button. */
+.video-js.vjs-playing .bumpable-fw-ad-container {
+  margin-top: -4em;
+}
+
+/* Move overlay when controls are active. */
+.video-js.vjs-user-inactive.vjs-playing .bumpable-fw-ad-container {
+  margin-top: 0em;
+}
+
+.video-js.vjs-paused .bumpable-fw-ad-container,
+.video-js.vjs-playing:hover .bumpable-fw-ad-container,
+.video-js.vjs-user-active.vjs-playing .bumpable-fw-ad-container {
+  margin-top: -4em;
+}
+
+.fw-controls-div {
+  bottom: 0em;
+  height: 1.4em;
+  position: absolute;
+  overflow: hidden;
+  display: none;
+  opacity: 1;
+  background-color: rgba(7, 20, 30, 0.7);
+  background: linear-gradient(
+    to top,
+    rgba(7, 20, 30, 0.7) 0%,
+    rgba(7, 20, 30, 0) 100%
+  );
+}
+
+.fw-controls-div.fw-controls-div-showing {
+  height: 3.7em;
+}
+
+.fw-countdown-div {
+  height: 1em;
+  margin-left: 1em;
+  color: #ffffff;
+  text-shadow: 0 0 0.2em #000;
+  cursor: default;
+}
+
+.fw-seek-bar-div {
+  top: 1.2em;
+  height: 0.3em;
+  position: absolute;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.fw-progress-div {
+  width: 0em;
+  height: 0.3em;
+  background-color: #ecc546;
+}
+
+.fw-play-pause-div,
+.fw-mute-div,
+.fw-slider-div,
+.fw-fullscreen-div {
+  width: 2.33em;
+  height: 1.33em;
+  top: 0.733em;
+  left: 0em;
+  position: absolute;
+  color: #cccccc;
+  font-size: 1.5em;
+  line-height: 2;
+  text-align: center;
+  font-family: VideoJS;
+  cursor: pointer;
+}
+
+.fw-mute-div {
+  left: auto;
+  right: 5.667em;
+}
+
+.fw-slider-div {
+  left: auto;
+  right: 2.33em;
+  width: 3.33em;
+  height: 0.667em;
+  top: 1.33em;
+  background-color: #555555;
+}
+
+.fw-slider-level-div {
+  width: 100%;
+  height: 0.667em;
+  background-color: #ecc546;
+}
+
+.fw-fullscreen-div {
+  left: auto;
+  right: 0em;
+}
+
+.fw-playing:before {
+  content: "\00f103";
+}
+
+.fw-paused:before {
+  content: "\00f101";
+}
+
+.fw-playing:hover:before,
+.fw-paused:hover:before {
+  text-shadow: 0 0 1em #fff;
+}
+
+.fw-non-fullscreen:before {
+  content: "\00f108";
+}
+
+.fw-fullscreen:before {
+  content: "\00f109";
+}
+
+.fw-non-fullscreen:hover:before,
+.fw-fullscreen:hover:before {
+  text-shadow: 0 0 1em #fff;
+}
