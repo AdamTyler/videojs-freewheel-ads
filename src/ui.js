@@ -1,5 +1,5 @@
-const fwUi = function (plugin) {
-  this.plugin = plugin;
+const fwUi = function (controller) {
+  this.controller = controller;
 
   this.adContainerDiv = document.createElement("div");
   this.controlsDiv = document.createElement("div");
@@ -15,7 +15,7 @@ const fwUi = function (plugin) {
   this.boundOnMouseMove = this.onMouseMove.bind(this);
 
   this.showCountdown = true;
-  if (this.plugin.getOptions().showCountdown === false) {
+  if (this.controller.getOptions().showCountdown === false) {
     this.showCountdown = false;
   }
   this.createAdContainer();
@@ -41,14 +41,14 @@ fwUi.prototype.createAdContainer = function () {
     false
   );
   this.createControls();
-  this.plugin.injectAdContainerDiv(this.adContainerDiv);
+  this.controller.injectAdContainerDiv(this.adContainerDiv);
 };
 
 fwUi.prototype.createControls = function () {
   this.assignControlAttributes(this.controlsDiv, "fw-controls-div");
   this.controlsDiv.style.width = "100%";
 
-  if (!this.plugin.getIsMobile()) {
+  if (!this.controller.getIsMobile()) {
     this.assignControlAttributes(this.countdownDiv, "fw-countdown-div");
     this.countdownDiv.innerHTML = "Ad";
     this.countdownDiv.style.display = this.showCountdown ? "block" : "none";
@@ -82,7 +82,7 @@ fwUi.prototype.createControls = function () {
   );
 
   // Hide volume slider controls on iOS as they aren't supported.
-  if (this.plugin.getIsIos()) {
+  if (this.controller.getIsIos()) {
     this.sliderDiv.style.display = "none";
   }
 
@@ -108,7 +108,7 @@ fwUi.prototype.createControls = function () {
 
 fwUi.prototype.onAdPlayPauseClick = function (e) {
   e.stopPropagation();
-  this.plugin.onAdPlayPauseClick();
+  this.controller.onAdPlayPauseClick();
 };
 
 fwUi.prototype.onAdsPaused = function () {
@@ -178,12 +178,12 @@ fwUi.prototype.changeVolume = function (clientX) {
   // Bounds value 0-100 if mouse is outside slider region.
   percent = Math.min(Math.max(percent, 0), 100);
   this.sliderLevelDiv.style.width = percent + "%";
-  this.plugin.setVolume(percent / 100); // 0-1
+  this.controller.setVolume(percent / 100); // 0-1
 };
 
 fwUi.prototype.onAdFullscreenClick = function (e) {
   e.stopPropagation();
-  this.plugin.toggleFullscreen();
+  this.controller.toggleFullscreen();
 };
 
 fwUi.prototype.onPlayerEnterFullscreen = function () {
@@ -198,7 +198,7 @@ fwUi.prototype.onPlayerExitFullscreen = function () {
 
 fwUi.prototype.onContainerClicked = function (e) {
   e.preventDefault();
-  this.plugin.onAdClicked(e);
+  this.controller.onAdClicked(e);
 };
 
 fwUi.prototype.showAdContainer = function () {
@@ -211,6 +211,8 @@ fwUi.prototype.hideAdContainer = function () {
 
 fwUi.prototype.reset = function () {
   this.hideAdContainer();
+  this.controlsDiv.style.display = "none";
+  this.countdownDiv.innerHTML = "";
 };
 
 fwUi.prototype.onAdError = function () {
@@ -253,7 +255,7 @@ fwUi.prototype.onPlayerVolumeChanged = function (volume) {
 };
 
 fwUi.prototype.showAdControls = function () {
-  const { disableAdControls } = this.plugin.getOptions();
+  const { disableAdControls } = this.controller.getOptions();
   if (!disableAdControls) {
     this.addClass(this.controlsDiv, "fw-controls-div-showing");
   }
