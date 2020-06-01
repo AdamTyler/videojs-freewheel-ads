@@ -1,15 +1,16 @@
-const fwUi = function (controller) {
+/* global document */
+const FwUi = function(controller) {
   this.controller = controller;
 
-  this.adContainerDiv = document.createElement("div");
-  this.controlsDiv = document.createElement("div");
-  this.countdownDiv = document.createElement("div");
-  this.fullscreenDiv = document.createElement("div");
-  this.playPauseDiv = document.createElement("div");
-  this.progressDiv = document.createElement("div");
-  this.seekBarDiv = document.createElement("div");
-  this.sliderDiv = document.createElement("div");
-  this.sliderLevelDiv = document.createElement("div");
+  this.adContainerDiv = document.createElement('div');
+  this.controlsDiv = document.createElement('div');
+  this.countdownDiv = document.createElement('div');
+  this.fullscreenDiv = document.createElement('div');
+  this.playPauseDiv = document.createElement('div');
+  this.progressDiv = document.createElement('div');
+  this.seekBarDiv = document.createElement('div');
+  this.sliderDiv = document.createElement('div');
+  this.sliderLevelDiv = document.createElement('div');
 
   this.boundOnMouseUp = this.onMouseUp.bind(this);
   this.boundOnMouseMove = this.onMouseMove.bind(this);
@@ -21,22 +22,22 @@ const fwUi = function (controller) {
   this.createAdContainer();
 };
 
-fwUi.prototype.createAdContainer = function () {
-  this.assignControlAttributes(this.adContainerDiv, "fw-ad-container");
-  this.adContainerDiv.style.position = "absolute";
+FwUi.prototype.createAdContainer = function() {
+  this.assignControlAttributes(this.adContainerDiv, 'fw-ad-container');
+  this.adContainerDiv.style.position = 'absolute';
   this.adContainerDiv.style.zIndex = 1111;
   this.adContainerDiv.addEventListener(
-    "mouseenter",
+    'mouseenter',
     this.showAdControls.bind(this),
     false
   );
   this.adContainerDiv.addEventListener(
-    "mouseleave",
+    'mouseleave',
     this.hideAdControls.bind(this),
     false
   );
   this.adContainerDiv.addEventListener(
-    "click",
+    'click',
     this.onContainerClicked.bind(this),
     false
   );
@@ -44,54 +45,54 @@ fwUi.prototype.createAdContainer = function () {
   this.controller.injectAdContainerDiv(this.adContainerDiv);
 };
 
-fwUi.prototype.createControls = function () {
-  this.assignControlAttributes(this.controlsDiv, "fw-controls-div");
-  this.controlsDiv.style.width = "100%";
+FwUi.prototype.createControls = function() {
+  this.assignControlAttributes(this.controlsDiv, 'fw-controls-div');
+  this.controlsDiv.style.width = '100%';
 
   if (!this.controller.getIsMobile()) {
-    this.assignControlAttributes(this.countdownDiv, "fw-countdown-div");
-    this.countdownDiv.innerHTML = "Ad";
-    this.countdownDiv.style.display = this.showCountdown ? "block" : "none";
+    this.assignControlAttributes(this.countdownDiv, 'fw-countdown-div');
+    this.countdownDiv.innerHTML = 'Ad';
+    this.countdownDiv.style.display = this.showCountdown ? 'block' : 'none';
   } else {
-    this.countdownDiv.style.display = "none";
+    this.countdownDiv.style.display = 'none';
   }
 
-  this.assignControlAttributes(this.seekBarDiv, "fw-seek-bar-div");
-  this.seekBarDiv.style.width = "100%";
+  this.assignControlAttributes(this.seekBarDiv, 'fw-seek-bar-div');
+  this.seekBarDiv.style.width = '100%';
 
-  this.assignControlAttributes(this.progressDiv, "fw-progress-div");
+  this.assignControlAttributes(this.progressDiv, 'fw-progress-div');
 
-  this.assignControlAttributes(this.playPauseDiv, "fw-play-pause-div");
-  this.addClass(this.playPauseDiv, "fw-playing");
+  this.assignControlAttributes(this.playPauseDiv, 'fw-play-pause-div');
+  this.addClass(this.playPauseDiv, 'fw-playing');
   this.playPauseDiv.addEventListener(
-    "click",
+    'click',
     this.onAdPlayPauseClick.bind(this),
     false
   );
 
-  this.assignControlAttributes(this.sliderDiv, "fw-slider-div");
+  this.assignControlAttributes(this.sliderDiv, 'fw-slider-div');
   this.sliderDiv.addEventListener(
-    "mousedown",
+    'mousedown',
     this.onAdVolumeSliderMouseDown.bind(this),
     false
   );
   this.sliderDiv.addEventListener(
-    "click",
+    'click',
     (e) => e.stopImmediatePropagation(),
     false
   );
 
   // Hide volume slider controls on iOS as they aren't supported.
   if (this.controller.getIsIos()) {
-    this.sliderDiv.style.display = "none";
+    this.sliderDiv.style.display = 'none';
   }
 
-  this.assignControlAttributes(this.sliderLevelDiv, "fw-slider-level-div");
+  this.assignControlAttributes(this.sliderLevelDiv, 'fw-slider-level-div');
 
-  this.assignControlAttributes(this.fullscreenDiv, "fw-fullscreen-div");
-  this.addClass(this.fullscreenDiv, "fw-non-fullscreen");
+  this.assignControlAttributes(this.fullscreenDiv, 'fw-fullscreen-div');
+  this.addClass(this.fullscreenDiv, 'fw-non-fullscreen');
   this.fullscreenDiv.addEventListener(
-    "click",
+    'click',
     this.onAdFullscreenClick.bind(this),
     false
   );
@@ -106,28 +107,28 @@ fwUi.prototype.createControls = function () {
   this.controlsDiv.appendChild(this.fullscreenDiv);
 };
 
-fwUi.prototype.onAdPlayPauseClick = function (e) {
+FwUi.prototype.onAdPlayPauseClick = function(e) {
   e.stopPropagation();
   this.controller.onAdPlayPauseClick();
 };
 
-fwUi.prototype.onAdsPaused = function () {
-  this.addClass(this.playPauseDiv, "fw-paused");
-  this.removeClass(this.playPauseDiv, "fw-playing");
+FwUi.prototype.onAdsPaused = function() {
+  this.addClass(this.playPauseDiv, 'fw-paused');
+  this.removeClass(this.playPauseDiv, 'fw-playing');
   this.showAdControls();
 };
 
-fwUi.prototype.onAdsResumed = function () {
+FwUi.prototype.onAdsResumed = function() {
   this.onAdsPlaying();
   this.showAdControls();
 };
 
-fwUi.prototype.onAdsPlaying = function () {
-  this.addClass(this.playPauseDiv, "fw-playing");
-  this.removeClass(this.playPauseDiv, "fw-paused");
+FwUi.prototype.onAdsPlaying = function() {
+  this.addClass(this.playPauseDiv, 'fw-playing');
+  this.removeClass(this.playPauseDiv, 'fw-paused');
 };
 
-fwUi.prototype.updatefwUi = function (
+FwUi.prototype.updateFwUi = function(
   currentTime,
   remainingTime,
   duration,
@@ -137,10 +138,12 @@ fwUi.prototype.updatefwUi = function (
   // Update countdown timer data
   const remainingMinutes = Math.floor(remainingTime / 60);
   let remainingSeconds = Math.floor(remainingTime % 60);
+  let podCount = ':';
+
   if (remainingSeconds.toString().length < 2) {
-    remainingSeconds = "0" + remainingSeconds;
+    remainingSeconds = '0' + remainingSeconds;
   }
-  let podCount = ":";
+
   if (totalAds > 1) {
     podCount = ` (${adPosition} of ${totalAds}):`;
   }
@@ -149,142 +152,146 @@ fwUi.prototype.updatefwUi = function (
   // Update UI
   const playProgressRatio = currentTime / duration;
   const playProgressPercent = playProgressRatio * 100;
-  this.progressDiv.style.width = playProgressPercent + "%";
+
+  this.progressDiv.style.width = playProgressPercent + '%';
 };
 
-fwUi.prototype.onAdVolumeSliderMouseDown = function (e) {
+FwUi.prototype.onAdVolumeSliderMouseDown = function(e) {
   e.stopPropagation();
-  document.addEventListener("mouseup", this.boundOnMouseUp, false);
-  document.addEventListener("mousemove", this.boundOnMouseMove, false);
+  document.addEventListener('mouseup', this.boundOnMouseUp, false);
+  document.addEventListener('mousemove', this.boundOnMouseMove, false);
 };
 
-fwUi.prototype.onMouseMove = function (e) {
-  e.stopPropagation();
-  this.changeVolume(e.clientX);
-};
-
-fwUi.prototype.onMouseUp = function (e) {
+FwUi.prototype.onMouseMove = function(e) {
   e.stopPropagation();
   this.changeVolume(e.clientX);
-  document.removeEventListener("mouseup", this.boundOnMouseUp);
-  document.removeEventListener("mousemove", this.boundOnMouseMove);
 };
 
-fwUi.prototype.changeVolume = function (clientX) {
+FwUi.prototype.onMouseUp = function(e) {
+  e.stopPropagation();
+  this.changeVolume(e.clientX);
+  document.removeEventListener('mouseup', this.boundOnMouseUp);
+  document.removeEventListener('mousemove', this.boundOnMouseMove);
+};
+
+FwUi.prototype.changeVolume = function(clientX) {
   let percent =
     (clientX - this.sliderDiv.getBoundingClientRect().left) /
     this.sliderDiv.offsetWidth;
+
   percent *= 100;
   // Bounds value 0-100 if mouse is outside slider region.
   percent = Math.min(Math.max(percent, 0), 100);
-  this.sliderLevelDiv.style.width = percent + "%";
-  this.controller.setVolume(percent / 100); // 0-1
+  this.sliderLevelDiv.style.width = percent + '%';
+  this.controller.setVolume(percent / 100);
 };
 
-fwUi.prototype.onAdFullscreenClick = function (e) {
+FwUi.prototype.onAdFullscreenClick = function(e) {
   e.stopPropagation();
   this.controller.toggleFullscreen();
 };
 
-fwUi.prototype.onPlayerEnterFullscreen = function () {
-  this.addClass(this.fullscreenDiv, "fw-fullscreen");
-  this.removeClass(this.fullscreenDiv, "fw-non-fullscreen");
+FwUi.prototype.onPlayerEnterFullscreen = function() {
+  this.addClass(this.fullscreenDiv, 'fw-fullscreen');
+  this.removeClass(this.fullscreenDiv, 'fw-non-fullscreen');
 };
 
-fwUi.prototype.onPlayerExitFullscreen = function () {
-  this.addClass(this.fullscreenDiv, "fw-non-fullscreen");
-  this.removeClass(this.fullscreenDiv, "fw-fullscreen");
+FwUi.prototype.onPlayerExitFullscreen = function() {
+  this.addClass(this.fullscreenDiv, 'fw-non-fullscreen');
+  this.removeClass(this.fullscreenDiv, 'fw-fullscreen');
 };
 
-fwUi.prototype.onContainerClicked = function (e) {
+FwUi.prototype.onContainerClicked = function(e) {
   e.preventDefault();
   this.controller.onAdClicked(e);
 };
 
-fwUi.prototype.showAdContainer = function () {
-  this.adContainerDiv.style.display = "block";
+FwUi.prototype.showAdContainer = function() {
+  this.adContainerDiv.style.display = 'block';
 };
 
-fwUi.prototype.hideAdContainer = function () {
-  this.adContainerDiv.style.display = "none";
+FwUi.prototype.hideAdContainer = function() {
+  this.adContainerDiv.style.display = 'none';
 };
 
-fwUi.prototype.reset = function () {
+FwUi.prototype.reset = function() {
   this.hideAdContainer();
-  this.controlsDiv.style.display = "none";
-  this.countdownDiv.innerHTML = "";
+  this.controlsDiv.style.display = 'none';
+  this.countdownDiv.innerHTML = '';
 };
 
-fwUi.prototype.onAdError = function () {
+FwUi.prototype.onAdError = function() {
   this.hideAdContainer();
 };
 
-fwUi.prototype.onAdBreakStart = function () {
+FwUi.prototype.onAdBreakStart = function() {
   this.showAdContainer();
-  this.controlsDiv.style.display = "block";
+  this.controlsDiv.style.display = 'block';
   this.onAdsPlaying();
   // Start with the ad controls minimized.
   this.hideAdControls();
 };
 
-fwUi.prototype.onAdBreakEnd = function () {
+FwUi.prototype.onAdBreakEnd = function() {
   this.hideAdContainer();
-  this.controlsDiv.style.display = "none";
-  this.countdownDiv.innerHTML = "";
+  this.controlsDiv.style.display = 'none';
+  this.countdownDiv.innerHTML = '';
 };
 
-fwUi.prototype.onAllAdsCompleted = function () {
+FwUi.prototype.onAllAdsCompleted = function() {
   this.hideAdContainer();
 };
 
-fwUi.prototype.onLinearAdStart = function () {
+FwUi.prototype.onLinearAdStart = function() {
   // Don't bump container when controls are shown
-  this.removeClass(this.adContainerDiv, "bumpable-fw-ad-container");
+  this.removeClass(this.adContainerDiv, 'bumpable-fw-ad-container');
 };
 
-fwUi.prototype.onNonLinearAdLoad = function () {
+FwUi.prototype.onNonLinearAdLoad = function() {
   // For non-linear ads that show after a linear ad. For linear ads, we show the
   // ad container in onAdBreakStart to prevent blinking in pods.
-  this.adContainerDiv.style.display = "block";
+  this.adContainerDiv.style.display = 'block';
   // Bump container when controls are shown
-  this.addClass(this.adContainerDiv, "bumpable-fw-ad-container");
+  this.addClass(this.adContainerDiv, 'bumpable-fw-ad-container');
 };
 
-fwUi.prototype.onPlayerVolumeChanged = function (volume) {
-  this.sliderLevelDiv.style.width = volume * 100 + "%";
+FwUi.prototype.onPlayerVolumeChanged = function(volume) {
+  this.sliderLevelDiv.style.width = volume * 100 + '%';
 };
 
-fwUi.prototype.showAdControls = function () {
+FwUi.prototype.showAdControls = function() {
   const { disableAdControls } = this.controller.getOptions();
+
   if (!disableAdControls) {
-    this.addClass(this.controlsDiv, "fw-controls-div-showing");
+    this.addClass(this.controlsDiv, 'fw-controls-div-showing');
   }
 };
 
-fwUi.prototype.hideAdControls = function () {
-  this.removeClass(this.controlsDiv, "fw-controls-div-showing");
+FwUi.prototype.hideAdControls = function() {
+  this.removeClass(this.controlsDiv, 'fw-controls-div-showing');
 };
 
-fwUi.prototype.assignControlAttributes = function (element, controlName) {
+FwUi.prototype.assignControlAttributes = function(element, controlName) {
   element.id = controlName;
   element.className = controlName;
 };
 
-fwUi.prototype.getClassRegexp = function (className) {
+FwUi.prototype.getClassRegexp = function(className) {
   // Matches on
   // (beginning of string OR NOT word char)
   // classname
   // (negative lookahead word char OR end of string)
-  return new RegExp("(^|[^A-Za-z-])" + className + "((?![A-Za-z-])|$)", "gi");
+  return new RegExp('(^|[^A-Za-z-])' + className + '((?![A-Za-z-])|$)', 'gi');
 };
 
-fwUi.prototype.addClass = function (element, classToAdd) {
-  element.className = element.className.trim() + " " + classToAdd;
+FwUi.prototype.addClass = function(element, classToAdd) {
+  element.className = element.className.trim() + ' ' + classToAdd;
 };
 
-fwUi.prototype.removeClass = function (element, classToRemove) {
+FwUi.prototype.removeClass = function(element, classToRemove) {
   const classRegexp = this.getClassRegexp(classToRemove);
-  element.className = element.className.trim().replace(classRegexp, "");
+
+  element.className = element.className.trim().replace(classRegexp, '');
 };
 
-export default fwUi;
+export default FwUi;
