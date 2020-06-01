@@ -10,7 +10,7 @@ const Controller = function(player, options) {
 
   // initialize contrib-ads plugin
   const contribAdsDefaults = {
-    debug: options.debug,
+    debug: options.debug
   };
   const adsPluginSettings = Object.assign(
     {},

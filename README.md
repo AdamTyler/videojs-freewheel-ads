@@ -31,6 +31,7 @@ This is the simplest case. Get the script in whatever way you prefer and include
 <script src='https://adm.fwmrm.net/libs/adm/6.35.0/AdManager.js'></script>
 <script src="//path/to/video.min.js"></script>
 <script src="//path/to/videojs-freewheel-ads.min.js"></script>
+<script src="//path/to/videojs-freewheel-ads.css"></script>
 <script>
   var player = videojs('my-video');
 
