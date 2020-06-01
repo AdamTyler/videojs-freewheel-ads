@@ -3,13 +3,6 @@ import videojs from 'video.js';
 import Controller from './controller.js';
 import { version as VERSION } from '../package.json';
 
-// Try overlay/postroll
-// Add other AdManager config options
-// test autoplay stuff
-// Publish to NPM
-// restore time working?
-// test: binge, minimized player, mobile
-
 // Default options for the plugin.
 const defaults = {
   adManagerLogLevel: 'quiet',

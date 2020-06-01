@@ -11,8 +11,6 @@ const Controller = function(player, options) {
   // initialize contrib-ads plugin
   const contribAdsDefaults = {
     debug: options.debug,
-    timeout: options.timeout,
-    prerollTimeout: options.prerollTimeout
   };
   const adsPluginSettings = Object.assign(
     {},
