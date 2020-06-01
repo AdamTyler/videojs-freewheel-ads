@@ -46,7 +46,7 @@
     "videojs",
     "videojs-plugin"
   ],
-  "author": "Adam Tyler <lazy9669@gmail.com>",
+  "author": "Adam Tyler <adam.tyler@utexas.edu>",
   "license": "MIT",
   "vjsstandard": {
     "ignore": [

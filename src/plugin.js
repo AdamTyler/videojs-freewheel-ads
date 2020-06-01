@@ -14,16 +14,16 @@ import { version as VERSION } from '../package.json';
 const defaults = {
   adManagerLogLevel: 'quiet',
   adSlots: [],
+  autoPlay: true,
   contribAdsSettings: {},
   debug: false,
   disableAdControls: false,
   networkId: '12345',
-  prerollTimeout: 4000,
   profileId: '12345:profile_id',
   serverURL: 'https://5fd74.v.fwmrm.net/ad/g/1',
   siteSectionId: 'videojs_freewheel_ads',
-  timeout: 1000,
-  videoAssetId: 'videoAssetId'
+  videoAssetId: 'videoAssetId',
+  videoDuration: 0
 };
 
 // Exposed plugin to the player for calling methods
