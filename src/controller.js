@@ -18,7 +18,6 @@ const Controller = function (player, options) {
   );
   this.player.ads(adsPluginSettings);
 
-  this.adDataRequested = false;
   this.adTrackingTimer = null;
   this.boundEndedListener = this.onContentVideoEnded.bind(this);
   this.boundTimeUpdate = this.onContentVideoTimeUpdated.bind(this);
@@ -31,6 +30,8 @@ const Controller = function (player, options) {
   this.currentAdSlot = null;
   this.freewheel = window.tv.freewheel;
   this.fwSDK = window.tv.freewheel.SDK;
+  // have to implement our own tracker since AdManger doesn't seem to dispose/remove listeners properly
+  this.isAdPlaying = false;
   this.playerControls = this.player.getChild("controlBar");
 
   this.setLogLevel(this.options.adManagerLogLevel);
@@ -46,17 +47,12 @@ const Controller = function (player, options) {
   this.player.on("readyforpreroll", () => {
     this.playback();
   });
-  this.player.on("dispose", () => this.cleanUp());
+  this.player.on("dispose", () => this.reset());
 
   // Only one AdManager instance is needed for each player
   this.adManager = new this.fwSDK.AdManager();
   this.adManager.setNetwork(this.options.networkId);
   this.adManager.setServer(this.options.serverURL);
-
-  // Creating initial ad context
-  this.currentAdContext = this.adManager.newContext();
-  this.currentAdContext.setProfile(this.options.profileId);
-  this.currentAdContext.setSiteSection(this.options.siteSectionId);
 
   // initialize ad ui overlay
   this.fwUi = new fwUi(this);
@@ -92,9 +88,6 @@ Controller.prototype.updateOptions = function (newOptions) {
   this.options = videojs.mergeOptions(this.options, newOptions);
 
   // create context for next request
-  this.currentAdContext = this.adManager.newContextWithContext(
-    this.currentAdContext
-  );
   this.setupContext();
 };
 
@@ -108,6 +101,9 @@ Controller.prototype.getCurrentAdSlot = function () {
 
 Controller.prototype.setupContext = function () {
   // set context video info for request
+  this.currentAdContext = this.adManager.newContext();
+  this.currentAdContext.setProfile(this.options.profileId);
+  this.currentAdContext.setSiteSection(this.options.siteSectionId);
   this.currentAdContext.setVideoAsset(
     this.options.videoAssetId,
     this.options.videoDuration
@@ -124,6 +120,14 @@ Controller.prototype.setupContext = function () {
     this.fwSDK.PARAMETER_LEVEL_GLOBAL
   );
   // setup listeners
+  this.currentAdContext.addEventListener(
+    this.fwSDK.EVENT_SLOT_STARTED,
+    this.onSlotStarted.bind(this)
+  );
+  this.currentAdContext.addEventListener(
+    this.fwSDK.EVENT_SLOT_ENDED,
+    this.onSlotEnded.bind(this)
+  );
   this.currentAdContext.addEventListener(
     this.fwSDK.EVENT_AD_IMPRESSION,
     this.onAdStarted.bind(this)
@@ -161,24 +165,13 @@ Controller.prototype.requestAds = function () {
   this.currentAdContext.registerVideoDisplayBase(displayBaseId);
 
   // Submit ad request
-
   // Listen to AdManager Events
   this.currentAdContext.addEventListener(
     this.fwSDK.EVENT_REQUEST_COMPLETE,
     this.onRequestComplete.bind(this)
   );
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_SLOT_STARTED,
-    this.onSlotStarted.bind(this)
-    // () => console.log("02wjrf0923hf02h082h30892hfr08h2w3")
-  );
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_SLOT_ENDED,
-    this.onSlotEnded.bind(this)
-  );
 
   // Submit ad request
-  this.adDataRequested = true;
   this.onAdRequest();
   this.fwAdsLog("Send ad request");
   this.currentAdContext.submitRequest();
@@ -204,7 +197,6 @@ Controller.prototype.getSlotType = function (adUnit) {
 // Listen for ad request completed and set all slot variables
 Controller.prototype.onRequestComplete = function (e) {
   this.fwAdsLog("Ad request completed");
-  this.adDataRequested = false;
   // After request completes, store each roll in corresponding slot array
   if (e.success) {
     const fwTemporalSlots = this.currentAdContext.getTemporalSlots();
@@ -240,12 +232,6 @@ Controller.prototype.onRequestComplete = function (e) {
 };
 
 Controller.prototype.playback = function () {
-  // this.fwAdsLog("-playback");
-  // if we are still waiting on a request, don't do anything
-  if (this.adDataRequested) {
-    this.fwAdsLog("---------here-------------");
-    return;
-  }
   // Play preroll(s) if a preroll slot exits, otherwise play content
   if (this.prerollSlots.length) {
     this.playPreroll();
@@ -272,7 +258,6 @@ Controller.prototype.playContent = function () {
   this.player.ads.contentSrc = this.contentSrc;
   this.player.src({ src: this.contentSrc, type: this.contentSrcType });
   this.fwAdsLog("Playing content");
-  console.log("-------timeupdate on (playcontent");
   this.player.on("timeupdate", this.boundTimeUpdate);
   this.contentState = "VIDEO_STATE_PLAYING";
   this.currentAdContext.setVideoState(this.fwSDK.VIDEO_STATE_PLAYING);
@@ -292,7 +277,6 @@ Controller.prototype.resumeContentAfterMidroll = function () {
 };
 
 Controller.prototype.playPostroll = function () {
-  this.fwAdsLog("Cleanup");
   // Play postroll(s) if exits, otherwise cleanup
   if (this.postrollSlots.length) {
     this.fwAdsLog("Playing postroll");
@@ -301,16 +285,22 @@ Controller.prototype.playPostroll = function () {
   } else {
     this.fwAdsLog("endlinearmode");
     this.onAdBreakEnd();
-    this.cleanUp();
+    this.reset();
   }
 };
 
 Controller.prototype.onSlotStarted = function (e) {
+  if (!this.isAdPlaying) {
+    return;
+  }
   this.currentAdSlot = e.slot;
   this.player.trigger("ads-pod-started", { currentSlot: this.currentAdSlot });
 };
 
 Controller.prototype.onSlotEnded = function (e) {
+  if (!this.isAdPlaying) {
+    return;
+  }
   // Play the next preroll/postroll ad when either a preroll or postroll stops
   // For a midroll slot, call resumeContentAfterMidroll() and wait for next midroll(if any)
   this.player.trigger("ads-pod-ended", { currentSlot: this.currentAdSlot });
@@ -333,7 +323,6 @@ Controller.prototype.onSlotEnded = function (e) {
 Controller.prototype.onContentVideoTimeUpdated = function () {
   this.fwAdsLog("Video time update, check for midroll/overlay");
   if (this.overlaySlots.length === 0 && this.midrollSlots.length === 0) {
-    console.log("-------timeupdate off (no midroll)");
     this.player.off("timeupdate", this.boundTimeUpdate);
   }
 
@@ -386,32 +375,19 @@ Controller.prototype.onContentVideoEnded = function () {
   }
 };
 
-Controller.prototype.cleanUp = function () {
-  this.fwAdsLog("Clean up plugin");
-  this.playerControls.hide();
-  if (this.player.ads.inAdBreak()) {
-    this.player.ads.endLinearAdMode();
-  }
+Controller.prototype.reset = function () {
+  this.fwAdsLog("Clean up and reset plugin");
   clearInterval(this.adTrackingTimer);
-  this.fwUi.onAdBreakEnd();
-  this.playerControls.show();
-
-  if (this.player.ads.inAdBreak()) {
-    player.ads.disableNextSnapshotRestore = true;
-    this.player.ads.endLinearAdMode();
-    this.player.trigger("contentresumed");
-  }
-  clearInterval(this.adTrackingTimer);
+  this.currentAdInstance = null;
+  this.currentAdSlot = null;
   this.contentPausedOn = 0;
   this.contentSrc = null;
   this.contentSrcType = null;
   this.contentState = "";
-  console.log("22222");
+  this.isAdPlaying = false;
   this.playerControls.show();
   this.fwUi.reset();
-  console.log("-------timeupdate off");
   this.player.off("timeupdate", this.boundTimeUpdate);
-  console.log("here");
   this.currentAdContext.removeEventListener(
     this.fwSDK.EVENT_REQUEST_COMPLETE,
     this.onRequestComplete.bind(this)
@@ -428,7 +404,6 @@ Controller.prototype.cleanUp = function () {
     this.fwSDK.EVENT_AD_IMPRESSION,
     this.onAdStarted.bind(this)
   );
-  console.log("here2");
   this.currentAdContext.removeEventListener(
     this.fwSDK.EVENT_AD_IMPRESSION_END,
     this.onAdEnded.bind(this)
@@ -437,12 +412,15 @@ Controller.prototype.cleanUp = function () {
     this.fwSDK.EVENT_ERROR,
     this.onAdError.bind(this)
   );
-
-  console.log("after cleanup");
-  console.log(this);
-  // if (this.currentAdContext) {
-  //   this.currentAdContext = null;
-  // }
+  if (this.currentAdContext) {
+    this.currentAdContext.dispose();
+    this.currentAdContext = null;
+  }
+  if (this.player.ads.inAdBreak()) {
+    player.ads.disableNextSnapshotRestore = true;
+    this.player.ads.endLinearAdMode();
+    this.player.trigger("contentresumed");
+  }
 };
 
 Controller.prototype.onAdsReady = function () {
@@ -466,11 +444,17 @@ Controller.prototype.onAdRequest = function () {
 };
 
 Controller.prototype.onAdStarted = function (e) {
+  if (!this.isAdPlaying) {
+    return;
+  }
   this.currentAdInstance = e.adInstance;
   this.player.trigger("ads-ad-started", { currentAd: e.adInstance });
 };
 
 Controller.prototype.onAdEnded = function (e) {
+  if (!this.isAdPlaying) {
+    return;
+  }
   this.player.trigger("ads-ad-ended", { currentAd: e.adInstance });
   this.currentAdInstance = null;
 };
@@ -524,8 +508,8 @@ Controller.prototype.toggleFullscreen = function () {
 
 Controller.prototype.onAdBreakEnd = function () {
   this.fwAdsLog("Ad break ended");
+  this.isAdPlaying = false;
   this.player.on("ended", this.boundEndedListener);
-  // this.playerControls.hide();
   if (this.player.ads.inAdBreak()) {
     this.player.ads.endLinearAdMode();
   }
@@ -536,6 +520,7 @@ Controller.prototype.onAdBreakEnd = function () {
 
 Controller.prototype.onAdBreakStart = function () {
   this.fwAdsLog("Starting ad break");
+  this.isAdPlaying = true;
   this.contentSrc = this.player.currentSrc();
   this.contentSrcType = this.player.currentType();
   this.player.off("ended", this.boundEndedListener);
@@ -547,6 +532,9 @@ Controller.prototype.onAdBreakStart = function () {
 };
 
 Controller.prototype.onAdPlayInterval = function () {
+  if (!this.isAdPlaying) {
+    return;
+  }
   this.fwAdsLog("Ad playing interval, update UI");
   const duration = this.currentAdSlot.getTotalDuration();
   // some ads don't provide this infto so set to zero

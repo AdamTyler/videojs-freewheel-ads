@@ -3,15 +3,11 @@ import fwUi from "./ui.js";
 import Controller from "./controller.js";
 import { version as VERSION } from "../package.json";
 
-// const Plugin = videojs.getPlugin("plugin");
-
 // TODO::::
 // Try overlay/postroll
 // Add other AdManager config options
 // test autoplay stuff
 // Publish to NPM
-// proper cleanup/removal of listeners
-// make sure all events are right
 // restore time working?
 // test: binge, minimized player, mobile
 
@@ -33,7 +29,6 @@ const defaults = {
 
 // Exposed plugin to the player for calling methods
 const FreewheelAds = function (player, options) {
-  // class FreewheelAds extends Plugin {
   /**
    * Create a FreewheelAds plugin instance.
    *
@@ -47,10 +42,7 @@ const FreewheelAds = function (player, options) {
    *         second argument of options is a convenient way to accept inputs
    *         from your plugin's caller.
    */
-  // constructor(player, options) {
   // the parent class will add player under this.player
-  // super(player);
-  // this.player = player;
 
   const mergedOptions = videojs.mergeOptions(defaults, options);
 
@@ -64,8 +56,8 @@ const FreewheelAds = function (player, options) {
 
   this.controller = new Controller(player, mergedOptions);
 
-  this.cleanUp = function () {
-    return this.controller.cleanUp();
+  this.reset = function () {
+    return this.controller.reset();
   }.bind(this);
 
   this.requestAds = function () {
@@ -87,6 +79,5 @@ const init = function (options) {
 // Register the plugin with video.js.
 const registerPlugin = videojs.registerPlugin || videojs.plugin;
 registerPlugin("freewheelAds", init);
-// videojs.registerPlugin("freewheelAds", FreewheelAds);
 
 export default FreewheelAds;
