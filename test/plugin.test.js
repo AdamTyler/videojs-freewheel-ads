@@ -1,5 +1,4 @@
 import document from 'global/document';
-import window from 'global/window';
 
 import QUnit from 'qunit';
 import sinon from 'sinon';
@@ -43,8 +42,6 @@ QUnit.module('videojs-freewheel-ads', {
 });
 
 QUnit.test('registers itself with video.js', function(assert) {
-  // eslint-disable-next-line
-  console.log(window.tv);
   assert.expect(2);
 
   assert.strictEqual(
