@@ -1,5 +1,6 @@
-/* global window document videojs */
+/* global window document */
 /* eslint indent: ["error", 2, { "SwitchCase": 1 }]*/
+import videojs from 'video.js';
 import FwUi from './ui.js';
 
 const Controller = function(player, options) {
