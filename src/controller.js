@@ -1,4 +1,4 @@
-/* global window document */
+/* global window document navigator */
 /* eslint indent: ["error", 2, { "SwitchCase": 1 }]*/
 import videojs from 'video.js';
 import FwUi from './ui.js';
@@ -37,6 +37,13 @@ const Controller = function(player, options) {
   this.playerControls = this.player.getChild('controlBar');
 
   this.setLogLevel(this.options.adManagerLogLevel);
+
+  this.isMobile = (navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/Android/i));
+
+  this.isIos = (navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i));
 
   this.player.ready(() => {
     this.player.addClass('vjs-freewheel-ads');
@@ -112,11 +119,6 @@ Controller.prototype.setupContext = function() {
   );
   // set UI parameters
   this.currentAdContext.setParameter(
-    this.fwSDK.PARAMETER_EXTENSION_AD_CONTROL_CLICK_ELEMENT,
-    'fw-ad-container',
-    this.fwSDK.PARAMETER_LEVEL_GLOBAL
-  );
-  this.currentAdContext.setParameter(
     this.fwSDK.PARAMETER_RENDERER_VIDEO_DISPLAY_CONTROLS_WHEN_PAUSE,
     false,
     this.fwSDK.PARAMETER_LEVEL_GLOBAL
@@ -142,6 +144,13 @@ Controller.prototype.setupContext = function() {
     this.fwSDK.EVENT_ERROR,
     this.onAdError.bind(this)
   );
+  if (!this.isMobile) {
+    this.currentAdContext.setParameter(
+      this.fwSDK.PARAMETER_EXTENSION_AD_CONTROL_CLICK_ELEMENT,
+      'fw-ad-container',
+      this.fwSDK.PARAMETER_LEVEL_GLOBAL
+    );
+  }
 };
 
 Controller.prototype.requestAds = function() {
@@ -438,7 +447,12 @@ Controller.prototype.onNoPostroll = function() {
 };
 
 Controller.prototype.onAdClicked = function() {
-  this.player.trigger('ads-click', { currentAd: this.currentAdInstance });
+  if (this.isMobile) {
+    // if its mobile, a click on the container should play/pause
+    this.onAdPlayPauseClick();
+  } else {
+    this.player.trigger('ads-click', { currentAd: this.currentAdInstance });
+  }
 };
 
 Controller.prototype.onAdRequest = function() {
@@ -491,6 +505,14 @@ Controller.prototype.getPlayerId = function() {
 
 Controller.prototype.getOptions = function() {
   return this.options;
+};
+
+Controller.prototype.getIsMobile = function() {
+  return this.isMobile;
+};
+
+Controller.prototype.getIsIos = function() {
+  return this.isIos;
 };
 
 Controller.prototype.setVolume = function(level) {

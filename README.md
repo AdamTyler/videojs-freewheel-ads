@@ -1,3 +1,21 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [videojs-freewheel-ads](#videojs-freewheel-ads)
+  - [Introduction](#introduction)
+  - [Features](#features)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [`<script>` Tag](#script-tag)
+    - [Browserify/CommonJS](#browserifycommonjs)
+    - [RequireJS/AMD](#requirejsamd)
+  - [Additional settings](#additional-settings)
+  - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # videojs-freewheel-ads
 
 Plugin for ads through the Freewheel network
@@ -82,14 +100,21 @@ The plugin accepts additional settings beyond what is shown in
 the previous snippet. 
 
 The following settings define your communication with Freewheel that is specific to your profile and ad offerings. The provided defaults will not function properly: 
-`networkId, profileId, serverURL, siteSectionId, videoAssetId, videoDuration`
+```
+networkId
+profileId
+serverURL
+siteSectionId
+videoAssetId
+videoDuration
+```
 
 A summary of all settings follows:
 
 | Settings | Type | Description |
 |----------|------|-------------|
-| adManagerLogLevel      | string       | Log info from AdManager itself. Can be one of `['quite', 'info', 'debug']. Defaults to 'quiet'. |
-| adSlots                | array        | Array of ad timeslots to be used in the request to Freewheel. Contains objects with (adUnit, id, timePosition} |
+| adManagerLogLevel      | string       | Log info from AdManager itself. Can be one of ['quite', 'info', 'debug']. Defaults to 'quiet'. |
+| adSlots                | array        | Array of ad timeslots to be used in the request to Freewheel. Contains objects with {adUnit, id, timePosition} |
 | autoPlay               | boolean      | True to begin ad request and playing automatically. Defaults to true. |
 | contribAdsSettings     | object       | Additional settings to be passed to the contrib-ads plugin. |
 | debug                  | boolean      | True to turn on all debug within the plugin. Defaults to false. |
