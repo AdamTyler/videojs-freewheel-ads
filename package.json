@@ -1,6 +1,6 @@
 {
   "name": "videojs-freewheel-ads",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "VideoJS plugin for ads through the Freewheel network",
   "main": "dist/videojs-freewheel-ads.cjs.js",
   "module": "dist/videojs-freewheel-ads.es.js",
