@@ -192,12 +192,18 @@ Controller.prototype.requestAds = function() {
 Controller.prototype.getSlotType = function(adUnit) {
   switch (adUnit) {
     case 'preroll':
+      if (this.options.isStream) {
+        return this.fwSDK.ADUNIT_STREAM_PREROLL;
+      }
       return this.fwSDK.ADUNIT_PREROLL;
     case 'midroll':
       return this.fwSDK.ADUNIT_MIDROLL;
     case 'overlay':
       return this.fwSDK.ADUNIT_OVERLAY;
     case 'postroll':
+      if (this.options.isStream) {
+        return this.fwSDK.ADUNIT_STREAM_POSTROLL;
+      }
       return this.fwSDK.ADUNIT_POSTROLL;
   }
 };

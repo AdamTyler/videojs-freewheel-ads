@@ -11,6 +11,7 @@ const defaults = {
   contribAdsSettings: {},
   debug: false,
   disableAdControls: false,
+  isStream: false,
   networkId: '12345',
   profileId: '12345:profile_id',
   serverURL: 'https://5fd74.v.fwmrm.net/ad/g/1',
