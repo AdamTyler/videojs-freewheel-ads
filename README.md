@@ -119,6 +119,7 @@ A summary of all settings follows:
 | contribAdsSettings     | object       | Additional settings to be passed to the contrib-ads plugin. |
 | debug                  | boolean      | True to turn on all debug within the plugin. Defaults to false. |
 | disableAdControls      | boolean      | True to hide the ad controls(play/pause, volume, and fullscreen buttons) during ad playback. Defaults to false. |
+| isStream               | string       | Is the source a livestream. Sets various parameters in the request. |
 | networkId              | string       | Freewheel newtork id. |
 | profileId              | string       | Freewheel profile id. |
 | serverURL              | string       | Freewheel server url. |

@@ -114,8 +114,24 @@ Controller.prototype.setupContext = function() {
   this.currentAdContext.setProfile(this.options.profileId);
   this.currentAdContext.setSiteSection(this.options.siteSectionId);
   this.currentAdContext.setVideoAsset(
+    // id {String|Number}  The id of the video asset which correspond to the ad request.
     this.options.videoAssetId,
-    this.options.videoDuration
+    // duration {Number}  The total duration of the video asset in seconds.
+    this.options.videoDuration,
+    // networkId {Number} Optional. The network id of the video asset.
+    undefined,
+    // location {String} Optional.  The location of the video asset
+    undefined,
+    // autoPlayType {Number} Optional, default is VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED
+    undefined,
+    // videoViewRandom	 Number} Optional.  The view random number of the Video Asset
+    undefined,
+    // idType Optional, default is ID_TYPE_CUSTOM
+    undefined,
+    // fallbackId {Number} Optional.  The fallback id of the video asset
+    undefined,
+    // durationType Optional, default is VIDEO_ASSET_DURATION_TYPE_EXACT
+    this.options.isStream ? this.fwSDK.VIDEO_ASSET_DURATION_TYPE_VARIABLE : undefined,
   );
   // set UI parameters
   this.currentAdContext.setParameter(
@@ -151,6 +167,10 @@ Controller.prototype.setupContext = function() {
       this.fwSDK.PARAMETER_LEVEL_GLOBAL
     );
   }
+  if (this.options.isStream) {
+    this.currentAdContext.setRequestMode(this.fwSDK.REQUEST_MODE_LIVE);
+    this.currentAdContext.setRequestDuration(30);
+  }
 };
 
 Controller.prototype.requestAds = function() {
@@ -163,11 +183,24 @@ Controller.prototype.requestAds = function() {
 
   this.options.adSlots.forEach(({ id, adUnit, timePosition }, index) => {
     this.currentAdContext.addTemporalSlot(
+      // customId {String} Custom id of the slot, add a slot with an identical name as existing slot will fail.
       id,
+      // adUnit {String} ad unit supported by the slot.  It can be one of ADUNIT_* or custom adUnit.
       this.getSlotType(adUnit),
+      // timePosition {Number} Time position of the slot in seconds.
       timePosition,
+      // slotProfile {String} Optional.  Profile name of the slot.
       null,
-      index + 1
+      // cuepointSequence {Number} Optional.  Cuepoint sequence override.
+      index + 1,
+      // maxDuration {Number} Optional.  Maximum duration of the slot allowed.  Default value is (0) = unlimited.
+      this.options.isStream ? 30 : undefined,
+      // minDuration {Number} Optional.  Minimum duration of the slot allowed.  Default value is (0) = no minimum duration requirement.
+      this.options.isStream ? 30 : undefined,
+      // acceptContentType {String} Optional.  Accepted content types, use “,” as delimiter.
+      undefined,
+      // signalId {String} Optional.  Signal ID, only applicable in Linear TV Streams, of the break
+      undefined,
     );
   });
 
