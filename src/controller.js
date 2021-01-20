@@ -10,6 +10,7 @@ const Controller = function(player, options) {
 
   // initialize contrib-ads plugin
   const contribAdsDefaults = {
+    contentIsLive: options.isStream,
     debug: options.debug
   };
   const adsPluginSettings = Object.assign(
@@ -318,7 +319,10 @@ Controller.prototype.resumeContentAfterMidroll = function() {
   this.onAdBreakEnd();
   this.player.ads.contentSrc = this.contentSrc;
   this.player.src({ src: this.contentSrc, type: this.contentSrcType });
-  this.player.currentTime(this.contentPausedOn);
+  // don't try to set time until new src is loaded
+  this.player.one('canplaythrough', () => {
+    this.player.currentTime(this.contentPausedOn);
+  });
   this.fwAdsLog(`Resume video at: ${this.contentPausedOn}`);
   this.contentState = 'VIDEO_STATE_PLAYING';
   this.currentAdContext.setVideoState(this.fwSDK.VIDEO_STATE_PLAYING);
