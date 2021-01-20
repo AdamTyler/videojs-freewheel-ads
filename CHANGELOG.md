@@ -1,3 +1,6 @@
+<a name="0.1.5"></a>
+## [0.1.5](https://github.com/AdamTyler/videojs-freewheel-ads/compare/v0.1.4...v0.1.5) (2021-01-20)
+
 <a name="0.1.4"></a>
 ## [0.1.4](https://github.com/AdamTyler/videojs-freewheel-ads/compare/v0.1.3...v0.1.4) (2020-07-20)
 
