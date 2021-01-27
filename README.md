@@ -28,7 +28,7 @@ functionality from Freewheel
 - Easily integrate the Freewheel AdManager SDK into the videojs ecosystem as a plugin.
 
 ## Requirements
-  - AdManager.js loaded into global scope (http://adm.fwmrm.net/p/[version]/AdManager.js). This plugin was written using version 6.35.0
+  - AdManager.js loaded into global scope (https://mssl.fwmrm.net/libs/adm/[version]/AdManager.js). This plugin was written using version 6.35.0
   - [VideoJS Contrib Ads](https://github.com/videojs/videojs-contrib-ads)
 
 ## Installation
@@ -46,7 +46,7 @@ To include videojs-freewheel-ads on your website or web application, use any of 
 This is the simplest case. Get the script in whatever way you prefer and include the plugin _after_ you include [video.js][videojs], so that the `videojs` global is available.
 
 ```html
-<script src='https://adm.fwmrm.net/libs/adm/6.35.0/AdManager.js'></script>
+<script src='https://mssl.fwmrm.net/libs/adm/6.35.0/AdManager.js'></script>
 <script src="//path/to/video.min.js"></script>
 <script src="//path/to/videojs-freewheel-ads.min.js"></script>
 <script src="//path/to/videojs-freewheel-ads.css"></script>
@@ -111,21 +111,21 @@ videoDuration
 
 A summary of all settings follows:
 
-| Settings | Type | Description |
-|----------|------|-------------|
-| adManagerLogLevel      | string       | Log info from AdManager itself. Can be one of ['quite', 'info', 'debug']. Defaults to 'quiet'. |
-| adSlots                | array        | Array of ad timeslots to be used in the request to Freewheel. Contains objects with {adUnit, id, timePosition} |
-| autoPlay               | boolean      | True to begin ad request and playing automatically. Defaults to true. |
-| contribAdsSettings     | object       | Additional settings to be passed to the contrib-ads plugin. |
-| debug                  | boolean      | True to turn on all debug within the plugin. Defaults to false. |
-| disableAdControls      | boolean      | True to hide the ad controls(play/pause, volume, and fullscreen buttons) during ad playback. Defaults to false. |
-| isStream               | string       | Is the source a livestream. Sets various parameters in the request. |
-| networkId              | string       | Freewheel newtork id. |
-| profileId              | string       | Freewheel profile id. |
-| serverURL              | string       | Freewheel server url. |
-| siteSectionId          | string       | Freewheel site section id. |
-| videoAssetId           | string       | Freewheel asset id. |
-| videoDuration          | number       | Asset duration in seconds. |
+| Settings           | Type    | Description                                                                                                     |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------- |
+| adManagerLogLevel  | string  | Log info from AdManager itself. Can be one of ['quite', 'info', 'debug']. Defaults to 'quiet'.                  |
+| adSlots            | array   | Array of ad timeslots to be used in the request to Freewheel. Contains objects with {adUnit, id, timePosition}  |
+| autoPlay           | boolean | True to begin ad request and playing automatically. Defaults to true.                                           |
+| contribAdsSettings | object  | Additional settings to be passed to the contrib-ads plugin.                                                     |
+| debug              | boolean | True to turn on all debug within the plugin. Defaults to false.                                                 |
+| disableAdControls  | boolean | True to hide the ad controls(play/pause, volume, and fullscreen buttons) during ad playback. Defaults to false. |
+| isStream           | string  | Is the source a livestream. Sets various parameters in the request.                                             |
+| networkId          | string  | Freewheel newtork id.                                                                                           |
+| profileId          | string  | Freewheel profile id.                                                                                           |
+| serverURL          | string  | Freewheel server url.                                                                                           |
+| siteSectionId      | string  | Freewheel site section id.                                                                                      |
+| videoAssetId       | string  | Freewheel asset id.                                                                                             |
+| videoDuration      | number  | Asset duration in seconds.                                                                                      |
 
 
 ## License
