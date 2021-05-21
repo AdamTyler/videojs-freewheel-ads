@@ -114,6 +114,8 @@ Controller.prototype.setupContext = function() {
   this.currentAdContext = this.adManager.newContext();
   this.currentAdContext.setProfile(this.options.profileId);
   this.currentAdContext.setSiteSection(this.options.siteSectionId);
+  // add the referer header
+  this.currentAdContext.addKeyValue('_fw_h_referer', document.location.href);
   this.currentAdContext.setVideoAsset(
     // id {String|Number}  The id of the video asset which correspond to the ad request.
     this.options.videoAssetId,
