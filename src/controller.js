@@ -113,29 +113,35 @@ Controller.prototype.setupContext = function() {
   // set context video info for request
   this.currentAdContext = this.adManager.newContext();
   this.currentAdContext.setProfile(this.options.profileId);
-  this.currentAdContext.setSiteSection(this.options.siteSectionId);
-  // add the referer header
-  this.currentAdContext.addKeyValue('_fw_h_referer', document.location.href);
-  this.currentAdContext.setVideoAsset(
-    // id {String|Number}  The id of the video asset which correspond to the ad request.
-    this.options.videoAssetId,
-    // duration {Number}  The total duration of the video asset in seconds.
-    this.options.videoDuration,
-    // networkId {Number} Optional. The network id of the video asset.
-    undefined,
-    // location {String} Optional.  The location of the video asset
-    undefined,
-    // autoPlayType {Number} Optional, default is VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED
-    undefined,
-    // videoViewRandom	 Number} Optional.  The view random number of the Video Asset
-    undefined,
-    // idType Optional, default is ID_TYPE_CUSTOM
-    undefined,
-    // fallbackId {Number} Optional.  The fallback id of the video asset
-    undefined,
-    // durationType Optional, default is VIDEO_ASSET_DURATION_TYPE_EXACT
-    this.options.isStream ? this.fwSDK.VIDEO_ASSET_DURATION_TYPE_VARIABLE : undefined,
+  this.currentAdContext.setSiteSection(
+    this.options.siteSectionId, // {String|Number} The id of the site section which correspond to the ad request.
+    this.options.networkId, // {Number} Optional. The networkId of the site section. Best to explicitly set it
+    Math.floor(100000000 + Math.random() * 900000000), // {Number} Optional. The view random number of the page (vprn) helps FW forecasting
+    undefined, //Optional, default is ID_TYPE_CUSTOM . Must be one of: - ID_TYPE_FW - ID_TYPE_CUSTOM - ID_TYPE_GROUP
+    undefined // {Number} The fallback id of the site section.
+  ); 
+  
+  this.currentAdContext.setVideoAsset( 
+    this.options.videoAssetId, // id {String|Number}  The id of the video asset which correspond to the ad request.
+    this.options.videoDuration, // duration {Number}  The total duration of the video asset in seconds.
+    this.options.networkId, // networkId {Number} Optional. The network id of the video asset.
+    "", // location {String} Optional.  The location of the video asset
+    this.fwSDK.VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED, // autoPlayType {Number} Optional, default is VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED
+    Math.floor(100000000 + Math.random() * 900000000), // videoViewRandom	 Number} Optional.  The view random number of the Video Asset. Helps with FW forecasting
+    this.fwSDK.ID_TYPE_CUSTOM, // idType Optional, default is ID_TYPE_CUSTOM
+    this.options.fallBackId, // fallbackId {Number} Optional.  The fallback id of the video asset. A fallback ID in FW hierarchy helps correct ads deliver if videoAssetId is unknown
+    this.options.isStream ? this.fwSDK.VIDEO_ASSET_DURATION_TYPE_VARIABLE : this.fwSDK.VIDEO_ASSET_DURATION_TYPE_EXACT, //durationType Optional, default is VIDEO_ASSET_DURATION_TYPE_EXACT
   );
+
+  this.currentAdContext.addKeyValue('_fw_h_referer', document.location.href);
+  
+  // Adds muliple FW Key Values from Options Config for items like _fw_us_privacy and audience targeting KVPs
+  var _this2 = this;
+
+  this.options.keyValues.forEach(function(fwKVP) {
+    _this2.currentAdContext.addKeyValue(fwKVP.key, fwKVP.value)
+  })
+
   // set UI parameters
   this.currentAdContext.setParameter(
     this.fwSDK.PARAMETER_RENDERER_VIDEO_DISPLAY_CONTROLS_WHEN_PAUSE,
