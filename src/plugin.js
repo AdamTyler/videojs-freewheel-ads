@@ -17,7 +17,9 @@ const defaults = {
   serverURL: 'https://5fd74.v.fwmrm.net/ad/g/1',
   siteSectionId: 'videojs_freewheel_ads',
   videoAssetId: 'videoAssetId',
-  videoDuration: 0
+  videoDuration: 0,
+  fallBackId: 12345,
+  keyValues: []
 };
 
 // Exposed plugin to the player for calling methods

@@ -126,6 +126,8 @@ A summary of all settings follows:
 | siteSectionId      | string  | Freewheel site section id.                                                                                      |
 | videoAssetId       | string  | Freewheel asset id.                                                                                             |
 | videoDuration      | number  | Asset duration in seconds.                                                                                      |
+| fallBackId         | number  | A numeric Id for a fallback asset when videoAssetId is not known to FW                                          |
+| keyValues          | array   | Array of FW Key Values to add to ad request in the form [{key: '_fw_us_privacy' value: '1YNN'}]                 |
 
 
 ## License
