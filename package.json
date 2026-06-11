@@ -85,7 +85,7 @@
     "videojs-contrib-ads": "^6.7.0"
   },
   "devDependencies": {
-    "@videojs/generator-helpers": "~1.0.0",
+    "@videojs/generator-helpers": "~3.2.0",
     "jsdoc": "BrandonOCasey/jsdoc#feat/plugin-from-cli",
     "karma": "^4.0.0",
     "postcss-cli": "^11.0.1",
