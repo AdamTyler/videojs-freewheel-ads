@@ -89,11 +89,11 @@
     "jsdoc": "BrandonOCasey/jsdoc#feat/plugin-from-cli",
     "karma": "^6.4.4",
     "postcss-cli": "^11.0.1",
-    "rollup": "^1.10.0",
+    "rollup": "^4.61.1",
     "sinon": "^22.0.0",
     "videojs-generate-karma-config": "~5.2.0",
     "videojs-generate-postcss-config": "~2.1.0",
-    "videojs-generate-rollup-config": "~3.1.0",
+    "videojs-generate-rollup-config": "~7.0.2",
     "videojs-generator-verify": "~1.2.0",
     "videojs-languages": "^2.0.0",
     "videojs-standard": "^9.1.0"
