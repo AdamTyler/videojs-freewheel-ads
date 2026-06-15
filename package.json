@@ -82,7 +82,7 @@
   "dependencies": {
     "global": "^4.3.2",
     "video.js": "^6 || ^7",
-    "videojs-contrib-ads": "^6.7.0"
+    "videojs-contrib-ads": "^7.5.2"
   },
   "devDependencies": {
     "@videojs/generator-helpers": "~3.2.0",
