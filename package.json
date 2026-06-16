@@ -94,7 +94,7 @@
     "videojs-generate-karma-config": "~8.1.0",
     "videojs-generate-postcss-config": "~2.1.0",
     "videojs-generate-rollup-config": "~7.0.2",
-    "videojs-generator-verify": "~1.2.0",
+    "videojs-generator-verify": "~4.1.3",
     "videojs-languages": "^2.0.0",
     "videojs-standard": "^9.1.0"
   }
