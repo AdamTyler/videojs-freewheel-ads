@@ -4,12 +4,12 @@
   "description": "VideoJS plugin for ads through the Freewheel network",
   "main": "dist/videojs-freewheel-ads.cjs.js",
   "module": "dist/videojs-freewheel-ads.es.js",
+  "browser": "dist/videojs-freewheel-ads.js",
   "generator-videojs-plugin": {
-    "version": "7.6.3"
+    "version": "9.0.0"
   },
   "browserslist": [
-    "defaults",
-    "ie 11"
+    "defaults"
   ],
   "scripts": {
     "prebuild": "npm run clean",
@@ -29,7 +29,7 @@
     "test": "npm-run-all test:*",
     "posttest": "shx cat test/dist/coverage/text.txt",
     "test:unit": "karma start scripts/karma.conf.js",
-    "test:verify": "vjsverify --verbose",
+    "test:verify": "vjsverify --verbose --skip-es-check",
     "update-changelog": "conventional-changelog -p videojs -i CHANGELOG.md -s",
     "preversion": "npm test",
     "version": "is-prerelease || npm run update-changelog && git add CHANGELOG.md",
@@ -39,15 +39,21 @@
     "prepublishOnly": "npm-run-all build test:verify"
   },
   "engines": {
-    "node": ">=8",
-    "npm": ">=5"
+    "node": ">=18",
+    "npm": ">=8"
   },
   "keywords": [
+    "ads",
+    "freewheel",
     "videojs",
     "videojs-plugin"
   ],
   "author": "Adam Tyler <adam.tyler@utexas.edu>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdamTyler/videojs-freewheel-ads.git"
+  },
   "vjsstandard": {
     "ignore": [
       "dist",
@@ -64,33 +70,20 @@
     "src/",
     "test/"
   ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "vjsstandard --fix",
-      "git add"
-    ],
-    "README.md": [
-      "doctoc --notitle",
-      "git add"
-    ]
-  },
-  "dependencies": {
-    "global": "^4.3.2",
-    "video.js": "^6 || ^7",
+  "peerDependencies": {
+    "video.js": "^8.11.6",
     "videojs-contrib-ads": "^7.5.2"
   },
   "devDependencies": {
     "@videojs/generator-helpers": "~3.2.0",
-    "jsdoc": "BrandonOCasey/jsdoc#feat/plugin-from-cli",
+    "jsdoc": "^4.0.4",
     "karma": "^6.4.4",
-    "postcss-cli": "^12.0.0",
-    "rollup": "^4.61.1",
+    "postcss": "^8.4.24",
+    "postcss-cli": "^8.3.1",
+    "rollup": "^2.79.2",
     "sinon": "^22.0.0",
+    "video.js": "^8.11.6",
+    "videojs-contrib-ads": "^7.5.2",
     "videojs-generate-karma-config": "~8.1.0",
     "videojs-generate-postcss-config": "~3.0.1",
     "videojs-generate-rollup-config": "~7.0.2",

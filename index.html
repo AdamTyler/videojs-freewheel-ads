@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>videojs-freewheel-ads Demo</title>
   <link href="node_modules/video.js/dist/video-js.css" rel="stylesheet">
+  <link href="node_modules/videojs-contrib-ads/dist/videojs-contrib-ads.css" rel="stylesheet">
   <link href="dist/videojs-freewheel-ads.css" rel="stylesheet">
 </head>
 <body>
@@ -15,12 +16,17 @@
     <li><a href="/test/debug.html">Run unit tests in browser.</a></li>
     <li><a href="docs/api/">Read generated docs.</a></li>
   </ul>
+  <script src="https://mssl.fwmrm.net/libs/adm/7.22.0/AdManager.js"></script>
   <script src="node_modules/video.js/dist/video.js"></script>
+  <script src="node_modules/videojs-contrib-ads/dist/videojs-contrib-ads.js"></script>
   <script src="dist/videojs-freewheel-ads.js"></script>
   <script>
     (function(window, videojs) {
       var examplePlayer = window.examplePlayer = videojs('videojs-freewheel-ads-player');
-      var freewheelAds = window.freewheelAds = examplePlayer.freewheelAds();
+      var freewheelAds = window.freewheelAds = examplePlayer.freewheelAds({
+        // replace these with your FreeWheel network settings to see ads
+        debug: true
+      });
     }(window, window.videojs));
   </script>
 </body>
