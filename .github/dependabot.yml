@@ -1,11 +1,23 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    ignore:
+      # The videojs-generate-* build configs only support these majors.
+      # Upgrading past them breaks `npm install` with peer dependency conflicts.
+      - dependency-name: "rollup"
+        versions: [">=3"]
+      - dependency-name: "postcss-cli"
+        versions: [">=9"]
+      # This plugin targets Video.js 8. Video.js 10 is a separate rewrite.
+      - dependency-name: "video.js"
+        versions: [">=9"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

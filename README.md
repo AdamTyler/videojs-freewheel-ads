@@ -1,7 +1,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [videojs-freewheel-ads](#videojs-freewheel-ads)
   - [Introduction](#introduction)
   - [Features](#features)
@@ -9,8 +8,7 @@
   - [Installation](#installation)
   - [Usage](#usage)
     - [`<script>` Tag](#script-tag)
-    - [Browserify/CommonJS](#browserifycommonjs)
-    - [RequireJS/AMD](#requirejsamd)
+    - [Bundlers (ES modules)](#bundlers-es-modules)
   - [Additional settings](#additional-settings)
   - [License](#license)
 
@@ -28,8 +26,10 @@ functionality from Freewheel
 - Easily integrate the Freewheel AdManager SDK into the videojs ecosystem as a plugin.
 
 ## Requirements
-  - AdManager.js loaded into global scope (https://mssl.fwmrm.net/libs/adm/[version]/AdManager.js). This plugin was written using version 6.35.0
-  - [VideoJS Contrib Ads](https://github.com/videojs/videojs-contrib-ads)
+  - [Video.js](https://videojs.com/) 8 (8.11.6 or later). Video.js 10 is a ground-up rewrite with a different plugin model and is not supported.
+  - [VideoJS Contrib Ads](https://github.com/videojs/videojs-contrib-ads) 7, loaded before this plugin is initialized
+  - AdManager.js loaded into global scope (`https://mssl.fwmrm.net/libs/adm/[version]/AdManager.js`). This plugin was originally written against version 6.35.0; the SDK calls it makes are still present in 7.22.0.
+  - A modern browser. Internet Explorer 11 is no longer supported.
 
 ## Installation
 
@@ -37,61 +37,71 @@ functionality from Freewheel
 npm install --save videojs-freewheel-ads
 ```
 
+`video.js` and `videojs-contrib-ads` are peer dependencies, so install them alongside the plugin if your project doesn't already have them.
+
 ## Usage
 
 To include videojs-freewheel-ads on your website or web application, use any of the following methods.
 
 ### `<script>` Tag
 
-This is the simplest case. Get the script in whatever way you prefer and include the plugin _after_ you include [video.js][videojs], so that the `videojs` global is available.
+This is the simplest case. Get the scripts in whatever way you prefer and include the plugin _after_ [video.js][videojs] and [videojs-contrib-ads][contrib-ads], so that the `videojs` global is available and the ads framework is registered.
 
 ```html
-<script src='https://mssl.fwmrm.net/libs/adm/6.35.0/AdManager.js'></script>
+<link href="//path/to/video-js.css" rel="stylesheet">
+<link href="//path/to/videojs-contrib-ads.css" rel="stylesheet">
+<link href="//path/to/videojs-freewheel-ads.css" rel="stylesheet">
+
+<script src="https://mssl.fwmrm.net/libs/adm/7.22.0/AdManager.js"></script>
 <script src="//path/to/video.min.js"></script>
+<script src="//path/to/videojs-contrib-ads.min.js"></script>
 <script src="//path/to/videojs-freewheel-ads.min.js"></script>
-<script src="//path/to/videojs-freewheel-ads.css"></script>
 <script>
   var player = videojs('my-video');
 
-  player.freewheelAds();
-</script>
-```
-
-### Browserify/CommonJS
-
-When using with Browserify, install videojs-freewheel-ads via npm and `require` the plugin as you would any other module.
-
-```js
-var videojs = require('video.js');
-var ads = require('videojs-contrib-ads');
-// The actual plugin function is exported by this module, but it is also
-// attached to the `Player.prototype`; so, there is no need to assign it
-// to a variable.
-require('videojs-freewheel-ads');
-
-var player = videojs('my-video');
-
-player.freewheelAds();
-```
-
-### RequireJS/AMD
-
-When using with RequireJS (or another AMD library), get the script in whatever way you prefer and `require` the plugin as you normally would:
-
-```js
-require(['video.js', 'videojs-contrib-ads', 'videojs-freewheel-ads'], function(videojs) {
-  var player = videojs('my-video');
-
-  var options = {
+  player.freewheelAds({
     networkId: '12345',
     profileId: '12345:profile_id',
     serverURL: 'https://5fd74.v.fwmrm.net/ad/g/1',
     siteSectionId: 'videojs_freewheel_ads',
     videoAssetId: 'videoAssetId',
-    videoDuration: 455
-  }
+    videoDuration: 455,
+    adSlots: [
+      { id: 'pre', adUnit: 'preroll', timePosition: 0 }
+    ]
+  });
+</script>
+```
 
-  player.freewheelAds();
+### Bundlers (ES modules)
+
+Install the plugin and its peer dependencies via npm:
+
+```sh
+npm install --save video.js videojs-contrib-ads videojs-freewheel-ads
+```
+
+Then import them. AdManager.js is not distributed on npm, so it still needs to be loaded with a `<script>` tag before the plugin is initialized.
+
+```js
+import videojs from 'video.js';
+import 'videojs-contrib-ads';
+// The plugin registers itself with video.js as `freewheelAds`.
+import 'videojs-freewheel-ads';
+
+import 'video.js/dist/video-js.css';
+import 'videojs-contrib-ads/dist/videojs-contrib-ads.css';
+import 'videojs-freewheel-ads/dist/videojs-freewheel-ads.css';
+
+const player = videojs('my-video');
+
+player.freewheelAds({
+  networkId: '12345',
+  profileId: '12345:profile_id',
+  serverURL: 'https://5fd74.v.fwmrm.net/ad/g/1',
+  siteSectionId: 'videojs_freewheel_ads',
+  videoAssetId: 'videoAssetId',
+  videoDuration: 455
 });
 ```
 
@@ -113,7 +123,7 @@ A summary of all settings follows:
 
 | Settings           | Type    | Description                                                                                                     |
 | ------------------ | ------- | --------------------------------------------------------------------------------------------------------------- |
-| adManagerLogLevel  | string  | Log info from AdManager itself. Can be one of ['quite', 'info', 'debug']. Defaults to 'quiet'.                  |
+| adManagerLogLevel  | string  | Log info from AdManager itself. Can be one of ['quiet', 'info', 'debug']. Defaults to 'quiet'.                  |
 | adSlots            | array   | Array of ad timeslots to be used in the request to Freewheel. Contains objects with {adUnit, id, timePosition}  |
 | autoPlay           | boolean | True to begin ad request and playing automatically. Defaults to true.                                           |
 | contribAdsSettings | object  | Additional settings to be passed to the contrib-ads plugin.                                                     |
@@ -124,6 +134,7 @@ A summary of all settings follows:
 | profileId          | string  | Freewheel profile id.                                                                                           |
 | serverURL          | string  | Freewheel server url.                                                                                           |
 | siteSectionId      | string  | Freewheel site section id.                                                                                      |
+| showCountdown      | boolean | True to show the "Ad (1 of 2): 0:15" countdown during ad playback on desktop. Defaults to true.                 |
 | videoAssetId       | string  | Freewheel asset id.                                                                                             |
 | videoDuration      | number  | Asset duration in seconds.                                                                                      |
 | fallBackId         | number  | A numeric Id for a fallback asset when videoAssetId is not known to FW                                          |
@@ -135,4 +146,5 @@ A summary of all settings follows:
 MIT. Copyright (c) Adam Tyler &lt;adam.tyler@utexas.edu&gt;
 
 
-[videojs]: http://videojs.com/
+[videojs]: https://videojs.com/
+[contrib-ads]: https://github.com/videojs/videojs-contrib-ads

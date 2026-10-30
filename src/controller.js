@@ -24,6 +24,13 @@ const Controller = function(player, options) {
   this.adTrackingTimer = null;
   this.boundEndedListener = this.onContentVideoEnded.bind(this);
   this.boundTimeUpdate = this.onContentVideoTimeUpdated.bind(this);
+  // bind context listeners once so the same references can be removed later
+  this.boundRequestComplete = this.onRequestComplete.bind(this);
+  this.boundSlotStarted = this.onSlotStarted.bind(this);
+  this.boundSlotEnded = this.onSlotEnded.bind(this);
+  this.boundAdStarted = this.onAdStarted.bind(this);
+  this.boundAdEnded = this.onAdEnded.bind(this);
+  this.boundAdError = this.onAdError.bind(this);
   this.contentPausedOn = 0;
   this.contentSrc = null;
   this.contentSrcType = null;
@@ -39,12 +46,12 @@ const Controller = function(player, options) {
 
   this.setLogLevel(this.options.adManagerLogLevel);
 
-  this.isMobile = (navigator.userAgent.match(/iPhone/i) ||
-    navigator.userAgent.match(/iPad/i) ||
-    navigator.userAgent.match(/Android/i));
+  // iPadOS 13+ reports a desktop Mac user agent, so check for touch support too
+  const isIpadOs = /Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
 
-  this.isIos = (navigator.userAgent.match(/iPhone/i) ||
-    navigator.userAgent.match(/iPad/i));
+  this.isIos = /iPhone|iPad/i.test(navigator.userAgent) || isIpadOs;
+
+  this.isMobile = this.isIos || /Android/i.test(navigator.userAgent);
 
   this.player.ready(() => {
     this.player.addClass('vjs-freewheel-ads');
@@ -66,9 +73,6 @@ const Controller = function(player, options) {
 
   // initialize ad ui overlay
   this.FwUi = new FwUi(this);
-
-  // initialize context events
-  this.setupContext();
 
   // start ads request if autoPlay set
   if (this.options.autoPlay) {
@@ -95,10 +99,8 @@ Controller.prototype.setLogLevel = function(level) {
 
 Controller.prototype.updateOptions = function(newOptions) {
   this.fwAdsLog('updateOptions, new options: ', newOptions);
-  this.options = videojs.mergeOptions(this.options, newOptions);
-
-  // create context for next request
-  this.setupContext();
+  // options are applied to the context created by the next requestAds call
+  this.options = videojs.obj.merge(this.options, newOptions);
 };
 
 Controller.prototype.getCurrentAdInstance = function() {
@@ -114,33 +116,45 @@ Controller.prototype.setupContext = function() {
   this.currentAdContext = this.adManager.newContext();
   this.currentAdContext.setProfile(this.options.profileId);
   this.currentAdContext.setSiteSection(
-    this.options.siteSectionId, // {String|Number} The id of the site section which correspond to the ad request.
-    this.options.networkId, // {Number} Optional. The networkId of the site section. Best to explicitly set it
-    Math.floor(100000000 + Math.random() * 900000000), // {Number} Optional. The view random number of the page (vprn) helps FW forecasting
-    undefined, //Optional, default is ID_TYPE_CUSTOM . Must be one of: - ID_TYPE_FW - ID_TYPE_CUSTOM - ID_TYPE_GROUP
-    undefined // {Number} The fallback id of the site section.
-  ); 
-  
-  this.currentAdContext.setVideoAsset( 
-    this.options.videoAssetId, // id {String|Number}  The id of the video asset which correspond to the ad request.
-    this.options.videoDuration, // duration {Number}  The total duration of the video asset in seconds.
-    this.options.networkId, // networkId {Number} Optional. The network id of the video asset.
-    "", // location {String} Optional.  The location of the video asset
-    this.fwSDK.VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED, // autoPlayType {Number} Optional, default is VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED
-    Math.floor(100000000 + Math.random() * 900000000), // videoViewRandom	 Number} Optional.  The view random number of the Video Asset. Helps with FW forecasting
-    this.fwSDK.ID_TYPE_CUSTOM, // idType Optional, default is ID_TYPE_CUSTOM
-    this.options.fallBackId, // fallbackId {Number} Optional.  The fallback id of the video asset. A fallback ID in FW hierarchy helps correct ads deliver if videoAssetId is unknown
-    this.options.isStream ? this.fwSDK.VIDEO_ASSET_DURATION_TYPE_VARIABLE : this.fwSDK.VIDEO_ASSET_DURATION_TYPE_EXACT, //durationType Optional, default is VIDEO_ASSET_DURATION_TYPE_EXACT
+    // id {String|Number} The id of the site section which correspond to the ad request.
+    this.options.siteSectionId,
+    // networkId {Number} Optional. The networkId of the site section. Best to explicitly set it
+    this.options.networkId,
+    // pageViewRandom {Number} Optional. The view random number of the page (vprn) helps FW forecasting
+    Math.floor(100000000 + Math.random() * 900000000),
+    // idType Optional, default is ID_TYPE_CUSTOM. Must be one of ID_TYPE_FW, ID_TYPE_CUSTOM, ID_TYPE_GROUP
+    undefined,
+    // fallbackId {Number} Optional. The fallback id of the site section.
+    undefined
+  );
+
+  this.currentAdContext.setVideoAsset(
+    // id {String|Number} The id of the video asset which correspond to the ad request.
+    this.options.videoAssetId,
+    // duration {Number} The total duration of the video asset in seconds.
+    this.options.videoDuration,
+    // networkId {Number} Optional. The network id of the video asset.
+    this.options.networkId,
+    // location {String} Optional. The location of the video asset
+    '',
+    // autoPlayType {Number} Optional, default is VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED
+    this.fwSDK.VIDEO_ASSET_AUTO_PLAY_TYPE_ATTENDED,
+    // videoViewRandom {Number} Optional. The view random number of the Video Asset. Helps with FW forecasting
+    Math.floor(100000000 + Math.random() * 900000000),
+    // idType Optional, default is ID_TYPE_CUSTOM
+    this.fwSDK.ID_TYPE_CUSTOM,
+    // fallbackId {Number} Optional. A fallback ID in FW hierarchy helps correct ads deliver if videoAssetId is unknown
+    this.options.fallBackId,
+    // durationType Optional, default is VIDEO_ASSET_DURATION_TYPE_EXACT
+    this.options.isStream ? this.fwSDK.VIDEO_ASSET_DURATION_TYPE_VARIABLE : this.fwSDK.VIDEO_ASSET_DURATION_TYPE_EXACT
   );
 
   this.currentAdContext.addKeyValue('_fw_h_referer', document.location.href);
-  
-  // Adds muliple FW Key Values from Options Config for items like _fw_us_privacy and audience targeting KVPs
-  var _this2 = this;
 
-  this.options.keyValues.forEach(function(fwKVP) {
-    _this2.currentAdContext.addKeyValue(fwKVP.key, fwKVP.value)
-  })
+  // Adds muliple FW Key Values from Options Config for items like _fw_us_privacy and audience targeting KVPs
+  this.options.keyValues.forEach(({ key, value }) => {
+    this.currentAdContext.addKeyValue(key, value);
+  });
 
   // set UI parameters
   this.currentAdContext.setParameter(
@@ -149,26 +163,9 @@ Controller.prototype.setupContext = function() {
     this.fwSDK.PARAMETER_LEVEL_GLOBAL
   );
   // setup listeners
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_SLOT_STARTED,
-    this.onSlotStarted.bind(this)
-  );
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_SLOT_ENDED,
-    this.onSlotEnded.bind(this)
-  );
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_AD_IMPRESSION,
-    this.onAdStarted.bind(this)
-  );
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_AD_IMPRESSION_END,
-    this.onAdEnded.bind(this)
-  );
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_ERROR,
-    this.onAdError.bind(this)
-  );
+  this.getContextListeners().forEach(([event, listener]) => {
+    this.currentAdContext.addEventListener(event, listener);
+  });
   if (!this.isMobile) {
     this.currentAdContext.setParameter(
       this.fwSDK.PARAMETER_EXTENSION_AD_CONTROL_CLICK_ELEMENT,
@@ -182,8 +179,34 @@ Controller.prototype.setupContext = function() {
   }
 };
 
+Controller.prototype.getContextListeners = function() {
+  return [
+    [this.fwSDK.EVENT_REQUEST_COMPLETE, this.boundRequestComplete],
+    [this.fwSDK.EVENT_SLOT_STARTED, this.boundSlotStarted],
+    [this.fwSDK.EVENT_SLOT_ENDED, this.boundSlotEnded],
+    [this.fwSDK.EVENT_AD_IMPRESSION, this.boundAdStarted],
+    [this.fwSDK.EVENT_AD_IMPRESSION_END, this.boundAdEnded],
+    [this.fwSDK.EVENT_ERROR, this.boundAdError]
+  ];
+};
+
+Controller.prototype.disposeContext = function() {
+  if (!this.currentAdContext) {
+    return;
+  }
+  this.getContextListeners().forEach(([event, listener]) => {
+    this.currentAdContext.removeEventListener(event, listener);
+  });
+  this.currentAdContext.dispose();
+  this.currentAdContext = null;
+};
+
 Controller.prototype.requestAds = function() {
   this.fwAdsLog('Build ad request');
+  // A context can only be used for a single request, so always start fresh
+  this.disposeContext();
+  this.setupContext();
+
   // Configure ad request
   this.prerollSlots = [];
   this.postrollSlots = [];
@@ -209,7 +232,7 @@ Controller.prototype.requestAds = function() {
       // acceptContentType {String} Optional.  Accepted content types, use “,” as delimiter.
       undefined,
       // signalId {String} Optional.  Signal ID, only applicable in Linear TV Streams, of the break
-      undefined,
+      undefined
     );
   });
 
@@ -217,13 +240,6 @@ Controller.prototype.requestAds = function() {
   const displayBaseId = this.player.id() || 'video-player';
 
   this.currentAdContext.registerVideoDisplayBase(displayBaseId);
-
-  // Submit ad request
-  // Listen to AdManager Events
-  this.currentAdContext.addEventListener(
-    this.fwSDK.EVENT_REQUEST_COMPLETE,
-    this.onRequestComplete.bind(this)
-  );
 
   // Submit ad request
   this.onAdRequest();
@@ -391,7 +407,7 @@ Controller.prototype.onContentVideoTimeUpdated = function() {
   // Check whether overlay needs to be played
   for (let i = 0; i < this.overlaySlots.length; i += 1) {
     const overlaySlot = this.overlaySlots[i];
-    const slotTimePosition = this.overlaySlot.getTimePosition();
+    const slotTimePosition = overlaySlot.getTimePosition();
     const videoCurrentTime = this.player.currentTime();
 
     if (Math.abs(videoCurrentTime - slotTimePosition) < 0.5) {
@@ -428,9 +444,9 @@ Controller.prototype.onContentVideoEnded = function() {
   this.fwAdsLog('Content ended');
   // Unbind the event listener for detecting when the content video ends, and play postroll if any
   if (this.contentState === 'VIDEO_STATE_PLAYING') {
-    this.player.off('ended', this.onContentVideoEnded.bind(this));
+    this.player.off('ended', this.boundEndedListener);
     this.currentAdContext.setVideoState(this.fwSDK.VIDEO_STATE_COMPLETED);
-    this.contentState = this.fwSDK.VIDEO_STATE_COMPLETED;
+    this.contentState = 'VIDEO_STATE_COMPLETED';
     if (this.postrollSlots.length) {
       this.playPostroll();
     }
@@ -450,34 +466,7 @@ Controller.prototype.reset = function() {
   this.playerControls.show();
   this.FwUi.reset();
   this.player.off('timeupdate', this.boundTimeUpdate);
-  this.currentAdContext.removeEventListener(
-    this.fwSDK.EVENT_REQUEST_COMPLETE,
-    this.onRequestComplete.bind(this)
-  );
-  this.currentAdContext.removeEventListener(
-    this.fwSDK.EVENT_SLOT_STARTED,
-    this.onSlotStarted.bind(this)
-  );
-  this.currentAdContext.removeEventListener(
-    this.fwSDK.EVENT_SLOT_ENDED,
-    this.onSlotEnded.bind(this)
-  );
-  this.currentAdContext.removeEventListener(
-    this.fwSDK.EVENT_AD_IMPRESSION,
-    this.onAdStarted.bind(this)
-  );
-  this.currentAdContext.removeEventListener(
-    this.fwSDK.EVENT_AD_IMPRESSION_END,
-    this.onAdEnded.bind(this)
-  );
-  this.currentAdContext.removeEventListener(
-    this.fwSDK.EVENT_ERROR,
-    this.onAdError.bind(this)
-  );
-  if (this.currentAdContext) {
-    this.currentAdContext.dispose();
-    this.currentAdContext = null;
-  }
+  this.disposeContext();
   if (this.player.ads.inAdBreak()) {
     this.player.ads.disableNextSnapshotRestore = true;
     this.player.ads.endLinearAdMode();
@@ -556,14 +545,6 @@ Controller.prototype.getPlayerId = function() {
 
 Controller.prototype.getOptions = function() {
   return this.options;
-};
-
-Controller.prototype.getIsMobile = function() {
-  return this.isMobile;
-};
-
-Controller.prototype.getIsIos = function() {
-  return this.isIos;
 };
 
 Controller.prototype.setVolume = function(level) {

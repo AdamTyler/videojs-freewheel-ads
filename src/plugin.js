@@ -39,11 +39,16 @@ const FreewheelAds = function(player, options) {
    */
   // the parent class will add player under this.player
 
-  const mergedOptions = videojs.mergeOptions(defaults, options);
+  const mergedOptions = videojs.obj.merge(defaults, options);
 
   // make sure the AdManager script is attached to the window
   if (!window.tv || !window.tv.freewheel) {
     throw new Error('Missing dependency of AdManager.js. Global object tv doesn\'t exist');
+  }
+
+  // make sure videojs-contrib-ads has been registered with video.js
+  if (typeof player.ads !== 'function') {
+    throw new Error('Missing dependency of videojs-contrib-ads. It must be loaded before this plugin is initialized');
   }
 
   this.controller = new Controller(player, mergedOptions);
@@ -69,8 +74,6 @@ const init = function(options) {
 };
 
 // Register the plugin with video.js.
-const registerPlugin = videojs.registerPlugin || videojs.plugin;
-
-registerPlugin('freewheelAds', init);
+videojs.registerPlugin('freewheelAds', init);
 
 export default FreewheelAds;
