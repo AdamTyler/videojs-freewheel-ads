@@ -88,7 +88,7 @@
     "@videojs/generator-helpers": "~3.2.0",
     "jsdoc": "BrandonOCasey/jsdoc#feat/plugin-from-cli",
     "karma": "^6.4.4",
-    "postcss-cli": "^11.0.1",
+    "postcss-cli": "^12.0.0",
     "rollup": "^4.61.1",
     "sinon": "^22.0.0",
     "videojs-generate-karma-config": "~8.1.0",
